@@ -70,9 +70,9 @@ const InitialLayout = () => {
     }
   }, [loaded]);
 
-  useEffect(() => {
-    console.log("signed in status changed ", isSignedIn);
-  }, [isSignedIn]);
+  // useEffect(() => {
+  //   console.log("signed in status changed ", isSignedIn);
+  // }, [isSignedIn]);
 
   if (!loaded) {
     return null;

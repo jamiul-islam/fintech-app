@@ -8,31 +8,28 @@ import {
   KeyboardAvoidingView,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { isClerkAPIResponseError, useSignIn } from "@clerk/clerk-expo";
-
-enum SignInType {
-  Phone,
-  Email,
-  Google,
-  Apple,
-}
+import { SignInType } from "@/constants/Util";
 
 const Page = () => {
-  const { signIn } = useSignIn();
+  const { signIn, setActive, isLoaded } = useSignIn();
 
-  const [countryCode, setCountryCode] = useState("+880");
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [countryCode, setCountryCode] = useState("+44");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
 
   const onSignIn = async (type: SignInType) => {
     if (type === SignInType.Phone) {
-      console.log("phone was hit");
       try {
         const fullPhoneNumber = `${countryCode}${phoneNumber}`;
 
@@ -68,7 +65,28 @@ const Page = () => {
         }
       }
     } else if (type === SignInType.Email) {
-      console.log("email was hit");
+      if (!isLoaded) return;
+
+      try {
+        const signInAttempt = await signIn.create({
+          identifier: form.email,
+          password: form.password,
+        });
+
+        if (signInAttempt.status === "complete") {
+          await setActive({ session: signInAttempt.createdSessionId });
+          router.replace({
+            pathname: "/home",
+            params: { signin: "true" },
+          });
+        } else {
+          console.log(JSON.stringify(signInAttempt, null, 2));
+          Alert.alert("Error", "Log in failed. Please try again.");
+        }
+      } catch (err: any) {
+        console.log(JSON.stringify(err, null, 2));
+        Alert.alert("Error", err.errors[0].longMessage);
+      }
     } else if (type === SignInType.Google) {
       console.log("google was hit");
     } else if (type === SignInType.Apple) {
@@ -105,13 +123,33 @@ const Page = () => {
           />
         </View>
 
+        {/* EMAIL input */}
+        <View>
+          <TextInput
+            style={[styles.input, { marginBottom: 10 }]}
+            placeholder="Email"
+            textContentType="emailAddress"
+            onChangeText={(text) => setForm({ ...form, email: text })}
+            placeholderTextColor={Colors.gray}
+          />
+          <TextInput
+            style={[styles.input, { marginBottom: 20 }]}
+            placeholder="password"
+            textContentType="password"
+            onChangeText={(text) => setForm({ ...form, password: text })}
+            placeholderTextColor={Colors.gray}
+            secureTextEntry={true}
+          />
+        </View>
+
+        {/* continue with email */}
         <TouchableOpacity
           style={[
             defaultStyles.pillButton,
-            phoneNumber !== "" ? styles.enabled : styles.disabled,
+            form.email !== "" ? styles.enabled : styles.disabled,
             { marginBottom: 20 },
           ]}
-          onPress={() => onSignIn(SignInType.Phone)}
+          onPress={() => onSignIn(SignInType.Email)}
         >
           <Text style={defaultStyles.buttonText}>Login</Text>
         </TouchableOpacity>
@@ -134,24 +172,7 @@ const Page = () => {
           />
         </View>
 
-        <TouchableOpacity
-          onPress={() => onSignIn(SignInType.Email)}
-          style={[
-            defaultStyles.pillButton,
-            {
-              flexDirection: "row",
-              gap: 16,
-              marginTop: 20,
-              backgroundColor: "#fff",
-            },
-          ]}
-        >
-          <Ionicons name="mail" size={24} color={"#000"} />
-          <Text style={[defaultStyles.buttonText, { color: "#000" }]}>
-            Continue with email{" "}
-          </Text>
-        </TouchableOpacity>
-
+        {/* continue with google */}
         <TouchableOpacity
           onPress={() => onSignIn(SignInType.Google)}
           style={[
@@ -170,6 +191,7 @@ const Page = () => {
           </Text>
         </TouchableOpacity>
 
+        {/* continue with apple */}
         <TouchableOpacity
           onPress={() => onSignIn(SignInType.Apple)}
           style={[
@@ -194,7 +216,7 @@ const Page = () => {
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginVertical: 40,
+    marginVertical: 20,
     flexDirection: "row",
   },
   input: {

@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { Link, useRouter } from "expo-router";
-import { isClerkAPIResponseError, useSignUp } from "@clerk/clerk-expo";
+import { isClerkAPIResponseError, useSignUp, useAuth } from "@clerk/clerk-expo";
 import ReactNativeModal from "react-native-modal";
 import InputField from "@/components/InputField";
 import { SignInType } from "@/constants/Util";
@@ -25,6 +25,7 @@ const Page = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const { isLoaded, setActive, signUp } = useSignUp();
+  const { signOut } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [form, setForm] = useState({
@@ -40,9 +41,6 @@ const Page = () => {
 
   const router = useRouter();
 
-  /**
-   * function for MOBILE sign up
-   */
   const onSignUp = async (type: SignInType) => {
     if (type === SignInType.Phone) {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
@@ -69,6 +67,10 @@ const Page = () => {
       }
 
       try {
+        // First, try to sign out any existing session
+        await signOut();
+
+        // Then proceed with the sign-up process
         await signUp.create({
           emailAddress: form.email,
           password: form.password,
@@ -90,9 +92,6 @@ const Page = () => {
     }
   };
 
-  /**
-   * function for verifying the code within MODAL
-   */
   const onPressVerify = async () => {
     if (!isLoaded) return;
 

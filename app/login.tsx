@@ -13,11 +13,12 @@ import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
 import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { isClerkAPIResponseError, useSignIn } from "@clerk/clerk-expo";
+import { isClerkAPIResponseError, useAuth, useSignIn } from "@clerk/clerk-expo";
 import { SignInType } from "@/constants/Util";
 
 const Page = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { signOut } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -68,6 +69,7 @@ const Page = () => {
       if (!isLoaded) return;
 
       try {
+        await signOut();
         const signInAttempt = await signIn.create({
           identifier: form.email,
           password: form.password,

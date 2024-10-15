@@ -6,21 +6,44 @@ import {
   TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
 import Colors from "@/constants/Colors";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { isClerkAPIResponseError, useSignUp } from "@clerk/clerk-expo";
 
 const Page = () => {
+  const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
+
   const [countryCode, setCountryCode] = useState("+880");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const keyboardVerticalOffset = Platform.OS === "ios" ? 80 : 0;
+  const router = useRouter();
+  const { signUp } = useSignUp();
 
   const onSignUp = async () => {
     // TODO: clerk authentication
-    console.log("sign up hit");
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+    try {
+      await signUp!.create({
+        phoneNumber: fullPhoneNumber,
+      });
+
+      router.push({
+        pathname: "/verify/[phone]",
+        params: { phone: fullPhoneNumber },
+      });
+
+      signUp!.preparePhoneNumberVerification();
+    } catch (err) {
+      console.log("error", JSON.stringify(err, null, 2));
+      if (isClerkAPIResponseError(err)) {
+        Alert.alert("Error", err.errors[0].message);
+      }
+    }
   };
 
   return (

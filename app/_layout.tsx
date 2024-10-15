@@ -1,9 +1,11 @@
 import Colors from "@/constants/Colors";
+import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import * as SecureStore from "expo-secure-store";
 
 import { useFonts } from "expo-font";
-import { Link, router, Stack, useRouter } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -21,6 +23,33 @@ export {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+// clerk api key
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+if (!publishableKey) {
+  throw new Error(
+    "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env"
+  );
+}
+
+// Cache the Clerk JWT
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
+
 const InitialLayout = () => {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -28,6 +57,7 @@ const InitialLayout = () => {
   });
 
   const router = useRouter();
+  const { isLoaded, isSignedIn } = useAuth();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -39,6 +69,10 @@ const InitialLayout = () => {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    console.log("signed in status changed ", isSignedIn);
+  }, [isSignedIn]);
 
   if (!loaded) {
     return null;
@@ -92,16 +126,33 @@ const InitialLayout = () => {
         name="help"
         options={{ title: "Help", presentation: "modal" }}
       />
+
+      <Stack.Screen
+        name="verify/[phone]"
+        options={{
+          title: "",
+          headerBackTitle: "",
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: Colors.background },
+          headerLeft: () => (
+            <TouchableOpacity onPress={router.back}>
+              <Ionicons name="arrow-back" size={34} color={Colors.dark} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </Stack>
   );
 };
 
 const RootLayoutNav = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="light" />
-      <InitialLayout />
-    </GestureHandlerRootView>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <StatusBar style="light" />
+        <InitialLayout />
+      </GestureHandlerRootView>
+    </ClerkProvider>
   );
 };
 

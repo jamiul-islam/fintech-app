@@ -278,7 +278,7 @@ const Page = () => {
               ]}
               onPress={() => {
                 setShowSuccessModal(false);
-                router.push(`/home`);
+                router.replace(`/(authenticated)/(tabs)/home`);
               }}
             >
               <Text style={defaultStyles.buttonText}>Continue</Text>

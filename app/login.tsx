@@ -78,7 +78,7 @@ const Page = () => {
         if (signInAttempt.status === "complete") {
           await setActive({ session: signInAttempt.createdSessionId });
           router.replace({
-            pathname: "/home",
+            pathname: "/(authenticated)/(tabs)/home",
             params: { signin: "true" },
           });
         } else {

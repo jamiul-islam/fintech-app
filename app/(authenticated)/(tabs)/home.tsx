@@ -4,7 +4,7 @@ import React from "react";
 const Page = () => {
   return (
     <View>
-      <Text>HOMEPAGE</Text>
+      <Text>LOOK MOM I CAN CODE!</Text>
     </View>
   );
 };

@@ -5,7 +5,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as SecureStore from "expo-secure-store";
 
 import { useFonts } from "expo-font";
-import { Link, Stack, useRouter } from "expo-router";
+import { Link, Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import "react-native-reanimated";
+import { ActivityIndicator, Text, View } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -58,6 +59,7 @@ const InitialLayout = () => {
 
   const router = useRouter();
   const { isLoaded, isSignedIn } = useAuth();
+  const segments = useSegments();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -72,10 +74,23 @@ const InitialLayout = () => {
 
   // useEffect(() => {
   //   console.log("signed in status changed ", isSignedIn);
+  //   if (!isLoaded) return;
+
+  //   const inAuthGroup = segments[0] === "(authenticated)";
+
+  //   if (isSignedIn && !inAuthGroup) {
+  //     router.replace("/(authenticated)/(tabs)/home");
+  //   } else if (!isSignedIn) {
+  //     router.replace("/");
+  //   }
   // }, [isSignedIn]);
 
-  if (!loaded) {
-    return null;
+  if (!loaded || !isLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
   }
 
   return (
@@ -140,6 +155,11 @@ const InitialLayout = () => {
             </TouchableOpacity>
           ),
         }}
+      />
+
+      <Stack.Screen
+        name="(authenticated)/(tabs)"
+        options={{ headerShown: false }}
       />
     </Stack>
   );

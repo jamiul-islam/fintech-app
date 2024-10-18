@@ -16,7 +16,6 @@ export async function GET(request: Request) {
   // const res = await response.json();
   // return Response.json(res.data);
 
-  // TODO: comment after debugging with dummy data
   return Response.json(data);
 }
 

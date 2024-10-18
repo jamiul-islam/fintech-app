@@ -22,8 +22,6 @@ const CustomHeader = () => {
           },
         ]}
       >
-        {/* TODO: remove lint after adding tabScreen */}
-        {/* @ts-ignore */}
         <Link href={"/(authenticated)/(modals)/account"} asChild>
           <TouchableOpacity
             style={{

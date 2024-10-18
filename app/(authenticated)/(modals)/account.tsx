@@ -13,6 +13,7 @@ import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { getAppIcon, setAppIcon } from "expo-dynamic-app-icon";
+import { router } from "expo-router";
 
 const ICONS = [
   {
@@ -129,7 +130,13 @@ const Page = () => {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.btn} onPress={() => signOut()}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => {
+            signOut();
+            router.push("/");
+          }}
+        >
           <Ionicons name="log-out" size={24} color={"#fff"} />
           <Text style={{ color: "#fff", fontSize: 18 }}>Log out</Text>
         </TouchableOpacity>

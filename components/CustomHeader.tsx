@@ -34,7 +34,7 @@ const CustomHeader = () => {
             }}
           >
             <Text style={{ color: "#fff", fontWeight: "500", fontSize: 16 }}>
-              SG
+              JI
             </Text>
           </TouchableOpacity>
         </Link>

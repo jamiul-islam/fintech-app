@@ -29,7 +29,7 @@ const Page = () => {
       <View style={styles.buttons}>
         <Link
           // TODO: remove after completing home page
-          href={"/(authenticated)/(tabs)/home"}
+          href={"/(authenticated)/(tabs)/crypto"}
           // href={"/login"}
           style={[
             defaultStyles.pillButton,

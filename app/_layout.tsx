@@ -15,6 +15,9 @@ import {
 } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { ActivityIndicator, Text, View } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -79,7 +82,7 @@ const InitialLayout = () => {
   //   const inAuthGroup = segments[0] === "(authenticated)";
 
   //   if (isSignedIn && !inAuthGroup) {
-  //     router.replace("/(authenticated)/(tabs)/home");
+  //     router.replace("/(authenticated)/(tabs)/crypto");
   //   } else if (!isSignedIn) {
   //     router.replace("/");
   //   }
@@ -168,10 +171,12 @@ const InitialLayout = () => {
 const RootLayoutNav = () => {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style="light" />
-        <InitialLayout />
-      </GestureHandlerRootView>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <StatusBar style="light" />
+          <InitialLayout /> 
+        </GestureHandlerRootView>
+      </QueryClientProvider>
     </ClerkProvider>
   );
 };
